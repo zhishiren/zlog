@@ -48,6 +48,7 @@ ftp文件服务器设置：
 错误日记：
 	启动服务器时，产生了mysql错误，需要在mysql中配置GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'IDENTIFIED BY 'zxf1986121!' WITH GRANT OPTION;
 	在给mongodb的z2020数据库增加用户是，要先进入z2020中，use z2020；然后再用以上的命令创建。
+    使用git的时候，经常会网络错误，多试几次。用户名是zhi开头，密码是用github创建的token
 
 
 
