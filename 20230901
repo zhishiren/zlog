@@ -1,0 +1,179 @@
+常用命令：
+配置github:
+/Users/mac/.ssh 这是密钥所在
+cat id_rsa.pub  查看密钥
+git config --global user.name "github的名字"
+git config --global user.email "GitHub的email"
+ls -al ~/.ssh 查看本地有没有配置SSH
+ssh-keygen -t rsa -C "xxxxxx.com" 生成SSH
+
+进入宝塔页面命令：
+	/etc/init.d/bt default
+进入目录和虚拟环境：
+	cd /www/django2020/d2020
+	source /www/venv2020/bin/activate
+	uwsgi --ini /www/server/nginx/uwsgi_temp/d2020.ini
+	netstat -nap | grep 端口号
+	ps aux | grep 程序名称
+重启nginx：
+	service nginx restart
+启动uwsgi：
+	uwsgi --ini /www/server/nginx/uwsgi_temp/d2020.ini
+重启uwsgi：
+	netstat -nap | grep 8000
+	kill -9 端口号
+	uwsgi --ini /www/server/nginx/uwsgi_temp/d2020.ini
+
+启动django：
+	python3 manage.py runserver 0.0.0.0:8000
+
+uwsgi+nginx配置
+	以下是增添的配置文件：
+	根据网上视频对nginx+django+uwsgi进行设置，https://www.bilibili.com/video/BV1Sb411x7wi?from=search&seid=5052812153372818409
+	/www/server/nginx/uwsgi_temp/d2020.ini
+	/www/server/nginx/conf/nginx.conf
+
+ftp文件服务器设置：
+        # chmod 777 dirname
+
+错误日记：
+	启动服务器时，产生了mysql错误，需要在mysql中配置GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'IDENTIFIED BY 'zxf1986121!' WITH GRANT OPTION;
+	在给mongodb的z2020数据库增加用户是，要先进入z2020中，use z2020；然后再用以上的命令创建。
+
+
+
+# 这是原django版本中结束评论数据的函数名，以备参考
+# def denglu(request):
+#     response = {}
+#     pinglun= Pinglun(content=request.POST.get('content1'))
+#     pinglun.save()
+#     pl=Pinglun.objects.all()
+#     json=serializers.serialize("json",pl)
+#     return JsonResponse({"data":json})
+db.ceshi.insert({ceshi: 'ceshi'})
+
+
+@csrf_exempt
+def ceshi(request):
+    if(request.method == 'POST'):
+        response['ok'] = 1
+        return HttpResponse(response)
+
+from django.shortcuts import render
+from django.http import HttpResponse # 新添加
+# from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods
+
+from django.http import JsonResponse # 新添加
+from .models import Yonghu
+# from .models import Pinglun
+from django.core import serializers
+
+# @require_http_methods(["GET"])
+# @require_http_methods(["POST"])
+def denglu(request):
+    response = {}
+    pinglun= Pinglun(content=request.POST.get('content1'))
+    pinglun.save()
+    pl=Pinglun.objects.all()
+    json=serializers.serialize("json",pl)
+    return JsonResponse({"data":json})
+
+def login(request):
+    name = request.POST.get('name', None)
+    pwd = request.POST.get('password', None)
+    user = Yonghu.objects.get(username=name)
+    r_ok = {'status': 0,'msg': '登录成功！'}
+    r_mima = {'status': 1,'msg': '密码错误！'}
+    # r_yanzhengma = {'status': 2,'msg': '验证码错误！'}
+    # r_yonghuming = {'status': 3,'msg': '用户名不存在！'}
+    if user.userpswd == pwd:
+        response = JsonResponse(r_ok)
+        response.set_cookie('username', name, expires=60 * 15)
+        return response
+    else:
+        response = JsonResponse(r_mima)
+        return response
+
+def xunhuan11(request):
+    db=Yonghu.objects.all()
+    json=serializers.serialize("json",db)
+    return JsonResponse({"data":json,"status":0,"massage":"ok"})
+
+def shangchuan(request):
+    data = request.FILES.get('file')   # 'file'为FILES.get（）的默认参数，可修改(在iview组件upload中有name属性来设置)
+    create_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    SaveFile.objects.create(create_time=create_time, file_url=data)
+	#response = {'ceshizhi':create_time}
+	#return jsonify(response) 
+import time
+
+# Create your models here.这是设计数据库表的位置。使用python3 manage.py makemigrations进行迁移
+
+class Yonghu(models.Model):
+    userid   = models.IntegerField(primary_key=True,auto_created=True)
+    username = models.CharField(max_length=25)
+    userpswd = models.CharField(max_length=18)
+    # beizhu   = models.TextField()  # 记录评论内容的字段
+    # borndate = models.DateTimeField(default=time.strftime('%Y%m%d', time.localtime(time.time())))
+
+
+# class SaveFile(models.Model):
+#     create_time = models.DateTimeField(u"上传时间")
+#     file_url = models.FileField(upload_to='SaveExcel')  # 'SaveExcel'是保存excel的文件夹（即路径）
+
+# class Pinglun(models.Model):
+#     contentid = models.IntegerField(auto_created=True,null=True)
+#     content = models.TextField(null=True)  # 记录评论内容的字段
+
+'''
+class User(models.Model):
+    __tablename__='users'
+    user_id=models.Column(models.Integer(),primary_key=True,autoincrement=True)
+    user_pswd=models.CharField(max_length=18)
+    user_name=models.Column(models.String(49))
+    user_status=models.Column(models.Integer())
+    user_born_time=models.Column(models.DateTime)
+    user_lastlogin_time=models.Column(models.DateTime)
+
+    #user_header_image=
+
+
+    def __repr__(self):
+        return '<User %r>' % self.user_name
+
+
+
+
+class Wenji(models.Model):
+    __tablename__='wenjis'
+    wenji_id=models.Column(models.Integer(),primary_key=True,autoincrement=True)
+    wenji_name=models.Column(models.String(49))
+    wenji_status=models.Column(models.Integer())
+    wenji_effective_time=models.Column(models.DateTime)
+    wenji_disabled_time=models.Column(models.DateTime)
+    creater_id=models.Column(models.Integer())
+    wenduans=models.relationship('Wenduan',backref='wenji')
+
+    def __repr__(self):
+        return '<Wenji %r>' % self.wenji_name
+
+
+class Wenduan(models.Model):
+    __tablename__='wenduans'
+    wenduan_id=models.Column(models.Integer(),primary_key=True,autoincrement=True)
+    wenduan_name=models.Column(models.String(49))
+    wenduan_status=models.Column(models.Integer())
+    wenduan_uploaded_time=models.Column(models.DateTime)
+    wenduan_wenji_id=models.Column(models.Integer,models.ForeignKey('wenjis.wenji_id'))
+
+    def __repr__(self):
+        return '<Wenduan %r>' % self.wenduan_name
+
+class Test(mgmodels.Document):
+    name = mgmodels.StringField()
+    age = mgmodels.StringField()
+    def __str__(self):
+        return "------name:{} ------- age:{}".format(self.name,self.age)
+
+'''
